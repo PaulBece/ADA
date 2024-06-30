@@ -1,5 +1,4 @@
 *.exe
 *.pdf
 instN.cpp
-Prim.cpp
 .vscode/

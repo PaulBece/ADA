@@ -1,49 +1,50 @@
 #include <iostream>
 #include <vector>
+#include <algorithm>
+
 using namespace std;
 
 template <class T>
-bool solucion(int &nivel, vector<bool>& soa, T &voa, T &pact, T& bact, T &M) {
-    return nivel == soa.size() - 1 && pact <= M && bact>=voa;
+bool solution(T cTotal, T pact, int n, vector<bool> &soa) {
+    return n == soa.size() - 1 && pact <= cTotal;
 }
 
 template <class T>
-bool criterio(int& nivel, vector<bool>& soa, T& voa, T& pact, T& M) {
-    return nivel < soa.size() - 1 && pact <= M;
+bool criterio(T cTotal, T pact, int n, vector<bool>& soa) {
+    return n < soa.size() - 1 && pact <= cTotal;
 }
 
-bool masHermanos(int& nivel, vector<bool>& soa) {
-    return !soa[nivel];
+bool hermano(int n, vector<bool>& soa) {
+    return soa[n];
 }
 
 template <class T>
-T mochila(vector<T>& b, vector<T>& p, vector<bool>& s, T &M) {
-    int nivel = 0;
-    T voa = INT_MIN;
-    vector<bool> soa = s;
+T mochilaBinario(T cTotal, vector<T>& p, vector<T>& b, vector<bool>& s, T &pTotal) {
+    vector<bool> soa(s.size());
     T pact = 0, bact = 0;
-    while (nivel>=0) {
-        pact += p[nivel] * soa[nivel];
-        bact += b[nivel] * soa[nivel];
-        if (solucion(nivel, soa, voa, pact, bact, M)) {
-            voa = bact;
-            s = soa;
+    T voa = 0;
+    int n = 0;
+    while (n >= 0) {
+        soa[n] = !soa[n];
+        pact += p[n] * soa[n];
+        bact += b[n] * soa[n];
+        if (solution(cTotal,pact,n,soa)) {
+            if (bact >= voa) {
+                voa = bact;
+                s = soa;
+                pTotal = pact;
+            }
         }
-        if (criterio(nivel, soa, voa, pact, M)) {
-            nivel++;
+        if (criterio(cTotal, pact, n, soa)) {
+            n++;
         }
         else {
-            while (nivel >= 0) {
-                if (masHermanos(nivel, soa)) {
-                    soa[nivel] = 1;
-                    break;
-                }
-                else {
-                    pact -= p[nivel] * soa[nivel];
-                    bact -= b[nivel] * soa[nivel];
-                    soa[nivel] = 0;
-                    nivel--;
-                }
+            while (n>=0 && !hermano(n, soa)) {
+                n--;
+            }
+            if (n >= 0) {
+                pact -= p[n];
+                bact -= b[n];
             }
         }
     }
@@ -52,15 +53,18 @@ T mochila(vector<T>& b, vector<T>& p, vector<bool>& s, T &M) {
 
 int main()
 {
-    int n = 4;
-    int M = 7;
-    vector<int> b = { 2,3,4,5 };
-    vector<int> p = { 1,2,3,4 };
-    vector<bool> s (b.size());
-    cout << mochila(b, p, s, M) << endl;
-    for (auto it : s) {
+    float cTotal = 20;
+    float pTotal;
+    vector<float> pesos = { 7,5,8,2,7,9,1,3,12 };
+    vector<float> beneficios = { 9,5,7,4,8,6,1,2,3 };
+    vector<bool> solucion(pesos.size());
+    float bTotal = mochilaBinario(cTotal, pesos, beneficios, solucion, pTotal);
+    cout << "Beneficio total: " << bTotal << endl;
+    cout << "Peso total: " << pTotal << endl;
+    cout << "Objetos a escoger: ";
+    for (auto it : solucion)
         cout << it << " ";
-    }
+    cout << endl;
 
     return 0;
 }

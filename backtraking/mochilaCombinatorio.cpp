@@ -1,28 +1,29 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+
 using namespace std;
 
 template <class T>
-bool solucion(T &voa, T &pact, T& bact, T &M) {
-    return pact <= M && bact>=voa;
-}
-
-template <class T>
-T mochila(vector<T>& b, vector<T>& p, vector<bool>& s, T &M) {
+T mochilaCombinatoria(T cTotal, vector<T>& p, vector<T>& b, vector<bool>& s, T& pTotal) {
+    vector<bool> soa(s.size());
+    pTotal = 0;
     T voa = 0;
-    vector<bool> soa = s;
-    for (int i = 1; i < s.size()+1;i++) {
-        soa[soa.size() - i] = 1;        
+    for (int i = s.size() - 1; i >= 0; i--) {
+        soa[i] = 1;
         do {
-            T pact = 0, bact = 0;
+            T bact = 0, pact = 0;
             for (int j = 0; j < s.size(); j++) {
-                pact += p[j] * soa[j];
-                bact += b[j] * soa[j];
+                if (soa[j]) {
+                    pact += p[j];
+                    if (pact > cTotal) break;
+                    bact += b[j];
+                }
             }
-            if (solucion(voa, pact, bact, M)) {
-                voa = bact;
+            if (pact <= cTotal && bact >= voa) {
                 s = soa;
+                pTotal = pact;
+                voa = bact;
             }
         } while (next_permutation(soa.begin(), soa.end()));
     }
@@ -31,15 +32,19 @@ T mochila(vector<T>& b, vector<T>& p, vector<bool>& s, T &M) {
 
 int main()
 {
-    int n = 4;
-    int M = 7;
-    vector<int> b = { 2,3,4,5 };
-    vector<int> p = { 1,2,3,4 };
-    vector<bool> s (b.size());
-    cout << mochila(b, p, s, M) << endl;
-    for (auto it : s) {
+    float cTotal = 20;
+    float pTotal;
+    vector<float> pesos = { 7,5,8,2,7,9,1,3,12 };
+    vector<float> beneficios = { 9,5,7,4,8,6,1,2,3 };
+    vector<bool> solucion(pesos.size());
+    float bTotal = mochilaCombinatoria(cTotal, pesos, beneficios, solucion, pTotal);
+
+    cout << "Beneficio total: " << bTotal << endl;
+    cout << "Peso total: " << pTotal << endl;
+    cout << "Objetos a escoger: ";
+    for (auto it : solucion)
         cout << it << " ";
-    }
+    cout << endl;
 
     return 0;
 }
